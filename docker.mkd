@@ -330,7 +330,9 @@ IPC(Inter-Process Communications, 进程间通信)
 * Host: 所有进程可见的，全局的PIDS(init=1, ..., child=xxx, ...)
 * Container: 只有child + descendant(后代)可见，本地PIDS(child=1, ...)
 
-    
+看看代码
+
+
     #define _GNU_SOURCE
     #include <sys/types.h>
     #include <sys/wait.h>
