@@ -233,3 +233,85 @@ Linux 3.12内核支持６种Namespace:
      - World!
     root@In Namespace:~/examples# 
 
+### IPC
+
+IPC(Inter-Process Communications, 进程间通信)
+
+要激活IPC namespace,　只需要把"CLONE_NEWPIC"标记添加到"clone"调用中。一旦激活，你就可以像往常一样
+创建IPC
+
+可是“父进程”和“子进程”不时隔离的吗？那么如何让它们通信？
+
+幸运的是，并非所有的东西隔离的，clone和它的parent分享内存空间。
+
+所以你依旧可以使用：
+
+* 信号(signal)
+* poll内存
+* 套接字(sockets)
+* 使用文件(file)和文件描述符(fd)
+
+
+我们使用pipe
+
+    #include <unistd.h>
+    
+    int checkpoint[2];
+    pipe(checkpoint);
+
+
+    #define _GNU_SOURCE
+    #include <sys/types.h>
+    #include <sys/wait.h>
+    #include <stdio.h>
+    #include <sched.h>
+    #include <signal.h>
+    #include <unistd.h>
+    
+    #define STACK_SIZE (1024 * 1024)
+    
+    // sync primitive
+    int checkpoint[2];
+    static char child_stack[STACK_SIZE];
+    char * const child_args[] = {
+      "/bin/bash",
+      NULL
+    };
+    
+    int child_main(void *arg)
+    {
+      char c;
+      // init sync primitive
+      close(checkpoint[1]);
+      // wait...
+      read(checkpoint[0], &c, 1);
+      printf(" - World!\n");
+      sethostname("In Namespace", 12);
+      execv(child_args[0], child_args);
+      printf("Ooops\n");
+      return 1;
+    }
+    
+    int main(int argc, char *argv[])
+    {
+      // init sync primitive
+      pipe(checkpoint);
+      printf(" - Hello?\n");
+      int child_pid = clone(child_main, child_stack+STACK_SIZE,
+                            CLONE_NEWUTS | CLONE_NEWIPC | SIGCHLD, NULL);
+      // some damn long init job
+      sleep(4);
+      // signal "done"
+      close(checkpoint[1]);
+      waitpid(child_pid, NULL, 0);
+      return 0;
+    }
+
+
+    $ sudo ./main-2-ipc
+     - Hello?
+     // sleep for 4s
+     - World!
+
+
+这里原理是parent一个close事件，child读取等待"EOF"接收，并且接收时所有的写fd都必须被关闭。
