@@ -315,3 +315,94 @@ IPC(Inter-Process Communications, 进程间通信)
 
 
 这里原理是parent一个close事件，child读取等待"EOF"接收，并且接收时所有的写fd都必须被关闭。
+
+
+### PID
+
+通过这个namespace我们将由可能重置PID计数，得到自己的“1"进程。
+
+要激活PID namespace，只需要把"CLONE_NEWPID"标记添加到"clone"调用。
+
+一旦激活，子进程getpid()的返回结果将为"1"
+
+但是这不时有两个"1"进程了？那么进程管理怎么搞?　事实上这还关系到进程可见
+
+* Host: 所有进程可见的，全局的PIDS(init=1, ..., child=xxx, ...)
+* Container: 只有child + descendant(后代)可见，本地PIDS(child=1, ...)
+
+    #define _GNU_SOURCE
+    #include <sys/types.h>
+    #include <sys/wait.h>
+    #include <stdio.h>
+    #include <sched.h>
+    #include <signal.h>
+    #include <unistd.h>
+    
+    #define STACK_SIZE (1024 * 1024)
+    
+    // sync primitive
+    int checkpoint[2];
+    static char child_stack[STACK_SIZE];
+    char * const child_args[] = {
+      "/bin/bash",
+      NULL
+    };
+    
+    int child_main(void *arg)
+    {
+      char c;
+      // init sync primitive
+      close(checkpoint[1]);
+      // wait...
+      read(checkpoint[0], &c, 1);
+      printf(" - [%5d] World!\n", getpid());
+      sethostname("In Namespace", 12);
+      execv(child_args[0], child_args);
+      printf("Ooops\n");
+      return 1;
+    }
+    
+    int main(int argc, char *argv[])
+    {
+      // init sync primitive
+      pipe(checkpoint);
+      printf(" - [%5d] Hello?\n", getpid());
+      int child_pid = clone(child_main, child_stack+STACK_SIZE,
+                      CLONE_NEWUTS | CLONE_NEWIPC |
+                      CLONE_NEWPID | SIGCHLD, NULL);
+      // futher init here (nothing yet)
+      // signal "done"
+      close(checkpoint[1]);
+      waitpid(child_pid, NULL, 0);
+      return 0;
+    }
+    
+    
+    
+    $ sudo ./ns 
+     - [14509] Hello?
+     - [    1] World!
+    
+可是为什么我又能在隔离的子进程看到宿主进程信息，你哄我吧？
+
+    # ps -ef 
+    UID        PID  PPID  C STIME TTY          TIME CMD
+    root         1     0  0 09:28 ?        00:00:01 /sbin/init splash
+    root         2     0  0 09:28 ?        00:00:00 [kthreadd]
+    root         3     2  0 09:28 ?        00:00:00 [ksoftirqd/0]
+    root         5     2  0 09:28 ?        00:00:00 [kworker/0:0H
+    ...
+    
+因为这些工具时从/proc文件系统获取的信息,而且该文件尚未隔离，我们可以这样搞
+
+    # mkdir -p proc
+    root@In Namespace:~/examples# mount -t proc proc
+    root@In Namespace:~/examples# ls
+    # ps -ef
+    UID        PID  PPID  C STIME TTY          TIME CMD
+    root         1     0  0 17:40 pts/8    00:00:00 /bin/bash
+    root        16     1  0 17:42 pts/8    00:00:00 ps -ef
+
+现在看不到了,下载我们使用NS来实现这一点
+
+
