@@ -406,6 +406,193 @@ IPC(Inter-Process Communications, 进程间通信)
     root         1     0  0 17:40 pts/8    00:00:00 /bin/bash
     root        16     1  0 17:42 pts/8    00:00:00 ps -ef
 
-现在看不到了,下载我们使用NS来实现这一点
+现在看不到了,下节我们使用NS来实现这一点
+
+### NS
+
+现在我们看看如何：隔离挂载表(mount table)
+
+前面我们用"chrooted"了PID namespace并且得到了一个"１“进程。但是，我还是没能隔离"top"等工具，因为这些都依赖"/proc"文件系统，该文件系统却依然被namespace之间共享。
+
+要激活NS namespace，只需要把"CLONE_NEWNS"标记添加到"clone"中，一旦激活，任何子进程的挂载和卸载操作都将只作用于本身，反之亦然。
+
+    
+    #define _GNU_SOURCE
+    #include <sys/types.h>
+    #include <sys/wait.h>
+    #include <sys/mount.h>
+    #include <stdio.h>
+    #include <sched.h>
+    #include <signal.h>
+    #include <unistd.h>
+    
+    #define STACK_SIZE (1024 * 1024)
+    
+    // sync primitive
+    int checkpoint[2];
+    static char child_stack[STACK_SIZE];
+    char * const child_args[] = {
+      "/bin/bash",
+      NULL
+    };
+    
+    int child_main(void *arg)
+    {
+      char c;
+      // init sync primitive
+      close(checkpoint[1]);
+      printf(" - [%5d] World!\n", getpid());
+      sethostname("In Namespace", 12);
+      // remount "/proc" to get accurate "top" && "ps" output
+      mount("proc", "/proc", "proc", 0, NULL);
+      // wait...
+      read(checkpoint[0], &c, 1);
+      execv(child_args[0], child_args);
+      printf("Ooops\n");
+      return 1;
+    }
+    
+    int main(int argc, char *argv[])
+    {
+      // init sync primitive
+      pipe(checkpoint);
+      printf(" - [%5d] Hello?\n", getpid());
+      int child_pid = clone(child_main, child_stack+STACK_SIZE,
+                      CLONE_NEWUTS | CLONE_NEWIPC |
+                      CLONE_NEWPID | CLONE_NEWNS |
+                      SIGCHLD, NULL);
+      // futher init here (nothing yet)
+      // signal "done"
+      close(checkpoint[1]);
+      waitpid(child_pid, NULL, 0);
+      return 0;
+    }
+
+现在我们不就不需要手动重新挂载"/proc"了。
 
 
+### NET
+
+现在我们学习如何隔离网络接口
+
+iproute2 - 网管的瑞士军刀
+
+
+    $ sudo ip link list
+    1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default 
+        link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP mode DEFAULT group default qlen 1000
+        link/ether 14:dd:a9:27:80:49 brd ff:ff:ff:ff:ff:ff
+    
+
+创建网络namespace
+
+    $ sudo ip netns add demo
+
+查看该接口
+
+    $ sudo ip netns exec demo ip link list
+    1: lo: <LOOPBACK> mtu 65536 qdisc noop state DOWN mode DEFAULT group default 
+        link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    
+存有个状态为"DOWN"的loopback，且于主loopback隔离。也就是说只有在该namespace内的应用可以进行通讯。
+
+但是不通namespace之间如何通讯呢？
+
+最简单的方式是，在"Host"和"Guest"之间创建一个点对点管道。Linux kernel提供了多种替代品，LXC使用用的是"veth"接口。
+
+    $ sudo ip netns add demo
+    $ sudo ip link add veth0 type veth peer name veth1
+    $ sudo ip link set veth1 netns demo
+    $ sudo ip netns exec demo ip link set lo up
+    $ sudo ip netns exec demo ip link set veth1 up
+    $ sudo ip netns exec demo ip addr add 169.254.1.2/30 dev veth1
+   
+要让"veth"技术在"guest"联网，那么需要"NAT"，为了可以宿主端口转到"guest"那么就可以使用"DNAT"
+
+    $ sudo echo 1 > /proc/sys/net/ipv4/ip_forward
+    $ sudo iptables -t nat -A POSTROUTING -i veth0 -j MASQUERADE
+    $ sudo iptables -t nat -A PREROUTING -d <your main ip>/32 -p tcp --dport 80 -j DNAT --to-destination 169.254.1.2:80
+    
+我们现在将CLONE_NEWNET添加到clone调用中，为了简化，我们通过system()直接调用"ip"。
+
+
+    #define _GNU_SOURCE
+    #include <sys/types.h>
+    #include <sys/wait.h>
+    #include <sys/mount.h>
+    #include <stdio.h>
+    #include <sched.h>
+    #include <signal.h>
+    #include <unistd.h>
+    #include <stdlib.h>
+    
+    #define STACK_SIZE (1024 * 1024)
+    
+    // sync primitive
+    int checkpoint[2];
+    static char child_stack[STACK_SIZE];
+    char * const child_args[] = {
+      "/bin/bash",
+      NULL
+    };
+    
+    int child_main(void *arg)
+    {
+      char c;
+      // init sync primitive
+      close(checkpoint[1]);
+      printf(" - [%5d] World!\n", getpid());
+      sethostname("In Namespace", 12);
+      mount("proc", "/proc", "proc", 0, NULL);
+      // wait...
+      read(checkpoint[0], &c, 1);
+      // setup network
+      system("ip link set lo up");
+      system("ip link set veth1 up");
+      system("ip addr add 169.254.1.2/30 dev veth1");
+      execv(child_args[0], child_args);
+      printf("Ooops\n");
+      return 1;
+    }
+    
+    int main(int argc, char *argv[])
+    {
+      // init sync primitive
+      pipe(checkpoint);
+      printf(" - [%5d] Hello?\n", getpid());
+      int child_pid = clone(child_main, child_stack+STACK_SIZE,
+                      CLONE_NEWUTS | CLONE_NEWIPC |
+                      CLONE_NEWPID | CLONE_NEWNS  |
+                      CLONE_NEWNET | SIGCHLD, NULL);
+      // futher init here (nothing yet)
+      char *cmd;
+      asprintf(&cmd, "ip link set veth1 netns %d", child_pid);
+      system("ip link add veth0 type veth peer name veth1");
+      system(cmd);
+      system("ip link set veth0 up");
+      system("ip addr add 169.254.1.1/30 dev veth0");
+      free(cmd);
+      // signal "done"
+      close(checkpoint[1]);
+      waitpid(child_pid, NULL, 0);
+      return 0;
+    }
+
+
+
+
+    $ sudo ./ns 
+     - [31400] Hello?
+     - [    1] World!
+
+
+    root@In Namespace:~/examples# nc -l 4242
+    hi
+    By
+
+    //　另外开个窗口
+    $ nc 169.254.1.2 4242
+    hi
+    By
+    
