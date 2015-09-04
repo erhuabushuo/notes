@@ -596,3 +596,141 @@ iproute2 - 网管的瑞士军刀
     hi
     By
     
+## Docker介绍
+
+Docker基于Go语言实现的开源项目，诞生于2013年初，DotClould公司（现今改名 Docker Inc)发起。
+它是一个新的容器技术，轻巧，易移植。号称"build once, configure once and run anywhere"。
+
+特性：
+
+* 速度飞快以及优雅的隔离框架
+* 物美价廉
+* CPU/内存开销低
+* 快速开/关机
+* 跨云计算基础架构
+
+###　组件与元素
+
+三个组件：
+
+* Docker Client
+* Docker Daemon
+* Docker Index
+
+三个要素：
+
+* Docker Containers
+* Docker Images
+* Docker File
+
+
+![Alt text](images/pic4.png)
+
+
+Docker支柱：
+
+* Namespaces
+* Control Group
+* UnionFS
+
+
+## 命令
+
+查看docker信息
+
+    # docker info
+    Containers: 2
+    Images: 6
+    Storage Driver: aufs
+     Root Dir: /var/lib/docker/aufs
+     Backing Filesystem: extfs
+     Dirs: 10
+     Dirperm1 Supported: true
+    Execution Driver: native-0.2
+    Logging Driver: json-file
+    Kernel Version: 3.19.0-26-generic
+    Operating System: Ubuntu 15.04
+    CPUs: 4
+    Total Memory: 15.61 GiB
+    Name: hewx
+    ID: BFK2:63JU:ZNHG:2TYP:WVDG:KFHJ:3G54:OZIB:PDO4:LKWM:AZLG:4HVN
+    WARNING: No swap limit support
+    
+构建镜像
+
+    # docker pull busybox
+    # docker run busybox /bin/echo Hello World
+Hello World
+
+
+后台方式运行
+
+    # sample_job=$(docker run -d busybox /bin/sh -c "while true; do echo Docker; sleep 1; done")
+
+通过分配的ID使用Docker logs命令来查看当前状态
+
+    # docker logs $sample_job 
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+Docker
+
+查看docker命令
+
+    # docker help
+    
+停止容器
+
+    # docker stop $sample_job
+    
+重启启动
+
+    # docker restart $sample_job
+    
+移除容器
+
+    # docker stop $sample_job; docker rm $sample_job
+    
+将容器状态保存为镜像
+
+    # docker commit $samle_job job1
+    
+查看镜像列表
+
+    # docker images
+    REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+    job1                latest              b995732988bf        6 seconds ago       2.433 MB
+    ubuntu              latest              91e54dfb1179        2 weeks ago         188.4 MB
+    hello-world         latest              af340544ed62        4 weeks ago         960 B
+    busybox             latest              8c2e06607696        4 months ago        2.433 MB
+    
+查找Docker registry中的镜像
+
+    # docker search (image-name)
+    
+查看历史版本
+
+    # docker history (image-name)
+    
+ 推送镜像到registry
+ 
+    # docker push (image-name)
