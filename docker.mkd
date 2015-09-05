@@ -756,7 +756,7 @@ Docker files支持如下语法命令：
 
     MAINTAINER <author name>
     
- 2. RUN: shell或者exec环境下执行命令
+2. RUN: shell或者exec环境下执行命令
  
     RUN <command>
     
