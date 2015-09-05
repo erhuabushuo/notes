@@ -766,31 +766,31 @@ Docker files支持如下语法命令：
     
 4. CMD: 提供容器默认的执行命令。只允许出现一次
 
-    CMD ["executable", "param1", "param2"]
+        CMD ["executable", "param1", "param2"]
     
 5. EXPOSE: 指定容器在运行时监听的端口
 
-    EXPOSE <port>
+        EXPOSE <port>
     
 6. ENTRYPOINT: 配置给容器一个可执行的命令
 
-    ENTRYPOINT ["executable", "param1", "param2"]
+        ENTRYPOINT ["executable", "param1", "param2"]
     
 7. WORKDIR: 指定RUN, CMD, 于ENTRYPOINT命令的工作目录
 
-    WORKDIR /path/to/workdir
+        WORKDIR /path/to/workdir
     
 8. ENV: 设置环境变量
 
-    ENV <key> <value>
+        ENV <key> <value>
     
 9. USER: 镜像正在运行时设置一个UID
 
-    USER <uid>
+        USER <uid>
     
 10. VALUME: 授权访问从容器内到主机上的目录
 
-    VOLUME ['/data']
+        VOLUME ['/data']
     
 我们来看看一个构建Flask app容器的实例
 
