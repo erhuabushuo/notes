@@ -734,3 +734,132 @@ Docker
  推送镜像到registry
  
     # docker push (image-name)
+    
+## Docker file  
+
+Docker file包含了创建镜像所需要的指令。基于Docker File中的指令，我们可以使用Docker build命令来创建镜像。
+从而简化部署。
+
+Docker files支持如下语法命令：
+
+    INSTRUCTION argument
+    
+所有Docker file必须以FROM命令开始。FROM命令会指定镜像基于哪个基础镜像创建，接下来的命令也会基于这个基础镜像。
+
+    FROM <image name>
+    
+例如：
+
+    FROM ubuntu
+    
+1. MAINTAINER: 设置镜像的作者
+
+    MAINTAINER <author name>
+    
+ 2. RUN: shell或者exec环境下执行命令
+ 
+    RUN <command>
+    
+3. ADD: 复制文件指令
+
+    ADD <src> <destination>
+    
+4. CMD: 提供容器默认的执行命令。只允许出现一次
+
+    CMD ["executable", "param1", "param2"]
+    
+5. EXPOSE: 指定容器在运行时监听的端口
+
+    EXPOSE <port>
+    
+6. ENTRYPOINT: 配置给容器一个可执行的命令
+
+    ENTRYPOINT ["executable", "param1", "param2"]
+    
+7. WORKDIR: 指定RUN, CMD, 于ENTRYPOINT命令的工作目录
+
+    WORKDIR /path/to/workdir
+    
+8. ENV: 设置环境变量
+
+    ENV <key> <value>
+    
+9. USER: 镜像正在运行时设置一个UID
+
+    USER <uid>
+    
+10. VALUME: 授权访问从容器内到主机上的目录
+
+    VOLUME ['/data']
+    
+我们来看看一个构建Flask app容器的实例
+
+
+    FROM ubuntu:latest
+    MAINTAINER aidan <erhuabushuo@gmail.com>
+    # 更新系统包
+    RUN apt-get update -y
+    RUN apt-get upgrade -y
+    
+    # 创建用户
+    RUN useradd -m flask
+    
+    # 安装Flask
+    RUN apt-get install -y python-pip
+    RUN pip install flask
+    
+    # 设置项目路径
+    ADD . /home/webroot/
+    
+    # 配置执行环境
+    USER flask
+    WORKDIR /home/webroot/
+    EXPOSE 5000
+    CMD ["python", "app.py"]
+
+    
+    docker build -t flaskapp .
+    
+    docker run -d -p 8000:5000  flaskapp
+    
+    
+## Docker Registry
+
+它是所有仓库（包括共有和私有）以及工作流的中央Registry
+
+相关术语：
+
+1. Respositories ：仓库
+2. 用户可以在仓库下评论
+3. 私有仓库和公有仓库
+4. 推送成功后可配置相关webhooks
+
+三个角色
+
+Index:  负责维护用户账户，镜像的校验以及公共命名空间的信息。
+
+Registry:　镜像和图表的仓库
+
+Registry client:　充当客户端来负责维护推送和拉取的任务，以及客户端的授权
+
+
+## Docker 安全
+
+docker run -> docker 运行lxc-start执行run -> lxc-start 在容器创建了一组namespace和Control Groups
+
+namespace: 容器相互隔离
+
+Control Groups:
+
+* 负责资源核算和限制
+* 提供CPU, 内存, I/O和网络相关的指标
+* 避免某种DoS攻击
+* 支持多租户平台
+
+
+关键Docker安全特性：
+
+1. 容器以非特权用户运行
+2. Apparmor、SELinux、GRSEC解决方案，可用于额外的安全层。
+3. 使用其他容器系统的安全功能
+
