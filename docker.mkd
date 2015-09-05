@@ -754,15 +754,15 @@ Docker files支持如下语法命令：
     
 1. MAINTAINER: 设置镜像的作者
 
-    MAINTAINER <author name>
+        MAINTAINER <author name>
     
 2. RUN: shell或者exec环境下执行命令
  
-    RUN <command>
+        RUN <command>
     
 3. ADD: 复制文件指令
 
-    ADD <src> <destination>
+        ADD <src> <destination>
     
 4. CMD: 提供容器默认的执行命令。只允许出现一次
 
