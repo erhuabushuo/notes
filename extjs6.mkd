@@ -1,0 +1,196 @@
+## Ext  JS 快速入门
+
+### 为什么用Ext JS
+
+* 跨浏览器支持
+* 富UI组件(data grid, tree controls, date picker, charts, and ...)
+* 双向绑定
+* 针对JavaScript架构模式
+* 复杂操作简单化
+* 简单DOM访问
+* 客户端路由(SPA)
+* 可见性
+
+### 介绍 Ext JS
+
+Ext JS 提供一站式富UI应用构建环境。提供了 MVC, MVVM, 双向绑定，跨浏览器支持，路由，大量的富UI组件，图标等等。
+
+由Jack Slocum构建于YUI扩展，现在所有Sencha Inc产品。
+
+Ext JS最大的变化是合并了两个框架： Ext JS 和 Sencha Touch
+
+### 设置 Ext JS
+
+#### 安装 Sencha Cmd
+
+    wget http://cdn.sencha.com/cmd/6.0.0.202/no-jre/SenchaCmd-6.0.0.202-linux-amd64.sh.zip
+    unzip SenchaCmd-6.0.0.202-linux-amd64.sh.zip
+    ./SenchaCmd-6.0.0.202-linux-amd64.sh
+    ls ~/bin/Sencha/
+    export PATH=/home/hewx/bin/Sencha/Cmd/:$PATH
+
+### 创建 Ext JS 应用
+
+    sencha generate app --ext MyApp ./myapp
+    
+创建MyApp应用并放在myapp目录下
+
+    上面创建的应用将包含两个工具:classic 和 modern，如果你只想其中一个可以使用--modern或者--classic
+    
+启动
+
+    cd myapp
+    sencha app watch
+    
+访问
+
+    http://localhost:1842
+    
+默认显示classic,通过?profile=modern切换为modern
+
+### 应用架构
+
+Ext JS 提供了两种应用架构MVC, MVVM
+
+#### Model
+
+数据层，包含数据验证，数据持久化逻辑。在Ext JS,　大部分model和data store一起使用。
+
+#### View
+
+呈现用户界面。例如button, form, messagebox
+
+#### Controller
+
+处理视图相关逻辑，事件处理，应用逻辑。
+
+#### View Model
+
+包装view呈现逻辑，绑定数据到view, 数据更改时处理更新。
+
+
+app.js
+
+    Ext.application({
+        name: 'MyApp',  // 定义应用名称
+    
+        extend: 'MyApp.Application',  // 定义在app目录下的Application.js里头
+    
+        requires: [
+            'MyApp.view.main.Main'
+        ],
+    
+        mainView: 'MyApp.view.main.Main'
+    	
+    });
+
+在Application.js你可以看到如下
+
+
+    Ext.define('MyApp.Application', {
+        extend: 'Ext.app.Application',
+        
+        name: 'MyApp',
+    
+        stores: [
+            // TODO: add global / shared stores here
+        ],
+        
+        launch: function () {
+            // TODO - Launch the application
+        }
+    });
+    
+我们可以看到MyApp.Application继承Ext.app.Application. lauch函数定义在Ext.app.Application。该函数在页面加载后调用
+
+#### MainModel.js
+
+看看\app\view\main\下的MainModel.js.该累时针对应用程序main视图的view model.继承Ext.app.ViewModel
+
+
+    Ext.define('MyApp.view.main.MainModel', {
+        extend: 'Ext.app.ViewModel',
+    
+        alias: 'viewmodel.main',
+    
+        data: {
+            name: 'MyApp',
+    
+            loremIpsum: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        }
+    
+        //TODO - add data, formulas and/or methods to support your view
+    });
+    
+#### MainController.js
+
+针对main视图的控制器。onItemSelected函数在选项选择的时候会执行
+
+    Ext.define('MyApp.view.main.MainController', {
+        extend: 'Ext.app.ViewController',
+    
+        alias: 'controller.main',
+    
+        onItemSelected: function (sender, record) {
+            Ext.Msg.confirm('Confirm', 'Are you sure?', 'onConfirm', this);
+        },
+    
+        onConfirm: function (choice) {
+            if (choice === 'yes') {
+                //
+            }
+        }
+    });
+
+有两种控制器: Ext.app.ViewController和Ext.app.Controller
+
+#### Main.js
+
+\modern\src\view\main\和\classic\src\view\main\下
+
+我们看看modern下的，该view定义了controller, viewModel, 以及其他依赖类。创建了四个tabs，绑定了viewModel的loremIpsum属性
+
+再看看classic下的，大部分是一样的，有个配置时针对responsive设计的ui: 'navigation'
+
+### 学习Sencha Cmd命令
+
+#### 格式
+
+    sencha [category] [command] [options...] [arguments…]
+
+#### 帮助
+
+    sencha help
+    
+#### 更新
+
+    sencha upgrade --check
+    sencha upgrade
+    
+#### 创建应用
+
+    sencha -sdk /path/to/sdk generate app [--modern/classic] MyApp /path/to/myapp
+
+#### 构建应用
+
+    sencha app build
+    sencha app build modern
+    sencha app build classic
+    
+#### 启用应用
+
+    sencha app watch
+    sencha app watch modern
+    sencha app watch classic
+
+#### 生成代码
+
+    sencha generate view myApp.MyView
+    sencha generate model MyModel id:int,fname,lname
+    sencha generate controller MyController
+
+#### 更新应用
+
+    sencha app upgrade [path-to-new-framework]
+    
+    
