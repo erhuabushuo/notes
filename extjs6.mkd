@@ -193,4 +193,159 @@ app.js
 
     sencha app upgrade [path-to-new-framework]
     
+
+### Ext JS调试
+
+Firefox的Illumination或者Chrome的App Inspector
+
+https://fiddle.sencha.com
+
+## 核心概念
+
+### 类机制
+
+* Ext
+* Ext.Base
+* Ext.Class
+* Ext.ClassManager
+* Ext.Loader
+
+#### Ext
+
+全局单例对象包装了Sencha库所有的类，单例s,　工具方法。许多工具函数定义在Ext.
+
+一些方法和属性：
+
+**application**
+
+很多应用程序通过Ext.application初始化。该函数加载Ext.app.Application类，通过提供的配置参数在页面加载完成后启动。
+
+Ext.app.Application是呈现整个应用的主要类。
+
+    Ext.application({
+        name: 'MyApp',
+        extend: 'MyApp.Application',
+        launch: function() {
+        
+        }
+    });
+
+该代码创建了MyApp全局变量。
+
+**define**
+
+创建或者覆盖一个类，接收三个参数，name为类名字，data是类属性，可选的callback在类创建后会调用
+
+    Ext.define(name, data, callback)
+
+以下代码创建了Car类
+
+    Ext.define('Car', {
+      name: null,
+      constructor: function(name) {
+        if (name) {
+          this.name = name;
+        }
+      },
+      start: function() {
+        alert("Car started");
+      }
+    });
     
+你也可以使用define来继承一个类
+
+    Ext.define('ElectricCar', {
+      extend: 'Car',
+      start: function() {
+        alert("Electric car started");
+      }
+    });
+    
+如果你向替换基类的实现，你也可以使用Ext.define来覆盖方法
+
+    Ext.define('My.ux.field.Text', {
+      override: 'Ext.form.field.Text',
+      setValue: function(val) {
+        this.callParent(['In override']);
+        return this;
+      }
+    });
+    
+也可以创建一个单例类
+
+    Ext.define('Logger', {
+      singleton: true,
+      log: function(msg) {
+        console.log(msg);
+      }
+    });
+    
+**create**
+
+创建类实例
+
+    Ext.create(Class, Options);
+    
+    var myCar = Ext.create('ElectricCar', {
+        name: 'MyElectricCar'
+    });
+    
+如果Ext.loader开启，那么Ext.create使用的类会被自动加载
+
+**onReady**
+
+该方法在页面加载后执行
+
+    Ext.onReady(function() {
+        new Ext.Component({
+            renderTo: document.body,
+            html: 'Dom ready!'
+        });
+    });
+    
+**widget**
+
+定义类时，你可以提供短别名。例如Ext.panel.Panel有widget.panel.
+
+    Ext.create('Ext.panel.Panel', {
+        renderTo: Ext.getBody(),
+        title: 'Panel'
+      });
+
+    Ext.widget('panel', {    
+        renderTo: Ext.getBody(),
+        title: 'Panel'
+      });
+
+    Ext.create('widget.panel', {
+        renderTo: Ext.getBody(),
+        title: 'Panel'
+      });
+      
+**getClass**
+
+返回对象类
+
+**getClassName**
+
+返回对象类名
+
+**Ext.Base**
+
+所有Ext类的基类
+
+**Ext.Class**
+
+用来Ext.ClassManager创建类的底层工厂类
+
+**Ext.ClassManager**
+
+管理所有类，维护字符串到实际类对象映射
+
+**Ext.Loader**
+
+动态依赖加载
+
+    Ext.require(['widget.window', 'layout.border', 'Ext.data.Connection']);
+    Ext.require(['widget.*', 'layout.*', 'Ext.data.*');
+    Ext.exclude('Ext.data.*').require('*');
