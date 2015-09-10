@@ -349,3 +349,136 @@ Ext.app.Application是呈现整个应用的主要类。
     Ext.require(['widget.window', 'layout.border', 'Ext.data.Connection']);
     Ext.require(['widget.*', 'layout.*', 'Ext.data.*');
     Ext.exclude('Ext.data.*').require('*');
+    
+    
+#### Events
+
+event可以是用户行为，Ajax响应等
+
+##### 添加listener
+
+    Ext.create('Ext.Button', {
+        renderTo: Ext.getBody(),
+        listeners: {
+            click: function() {
+                Ext.Msg.alert("Button clicked!");
+            }
+        }
+    });
+    
+添加多个events
+
+    Ext.create('Ext.Button', {
+        renderTo: Ext.getBody(),
+        listeners: {
+            mouseout: function() {
+              	// Do something  
+            },
+            click: function() {
+                // Do something
+            }
+        }
+    });
+    
+    
+你也可以在实例创建后使用on方法来添加listener
+
+    var button = Ext.create('Ext.button');
+    
+    button.on('click', function() {
+        // Do something
+    });
+    
+也可以使用on添加多个listeners
+
+    var button = Ext.create('Ext.button');
+    
+    button.on({
+        mouseover: function() {
+            // Do something
+        },
+        mouseover: function() {
+            // Do something
+        }
+    });
+    
+##### 移除listeners
+
+    var HandleClick = function() {
+        Ext.Msg.alert("My Button clicked!");
+    }
+    
+    Ext.create('Ext.Button', {
+        listeners: {
+            click: HandleClick
+        }
+    });
+    
+    button.un("click", HandleClick);
+    
+##### DOM节点事件处理
+    
+    <div id="mydiv"></div>
+
+    var div = Ext.get("mydiv");
+    
+    div.on("click", function(e, t, eOpts) {
+        // Do something
+    });
+
+#### 访问DOM
+
+三种方法访问DOM元素：get, query 和 select
+
+
+##### Ext.get
+
+以下返回Ext.dom.Element
+
+    var mydiv = Ext.get("myDivId");
+    
+##### Ext.query
+
+返回array
+
+    var someNodes = Ext.query(".oddRow", myCustomComponent.getEl().dom);
+    
+##### Ext.select
+
+支持CSS/XPath, 返回CompositeElement，是元素集合
+
+    var rows = Ext.select('div.row');
+    rows.setWidth(100);  // 设置元素为100宽
+ 
+** 多选择 **
+
+    Ext.select('div.row, span.title')
+    
+** 更换搜索基准节点 **
+
+    Ext.get('myEl').select('div.row‘)
+    
+    // or
+    
+    Ext.select('div.row', true, 'myEl');
+
+##### Ext.ComponentQuery
+
+通过ID, xtype和属性来搜索component
+
+    Ext.ComponentQuery.query('button')
+    
+    Ext.ComponentQuery.query(’#foo')
+    
+    Ext.ComponentQuery.query("button[title='my button']");
+    // or
+    parent.query('textfield[title=my button]');
+    
+也可以使用嵌套选择
+
+    Ext.ComponentQuery.query('formpanel numberfield');
+    
+    parent.child('button[itemId=save]');
+    
+当然你也可以使用**nextNode**, **up**, **down**, **previousSibiling**
+
