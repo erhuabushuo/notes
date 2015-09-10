@@ -17,7 +17,7 @@ Ext JS 提供一站式富UI应用构建环境。提供了 MVC, MVVM, 双向绑�
 
 由Jack Slocum构建于YUI扩展，现在所有Sencha Inc产品。
 
-Ext JS最大的变化是合并了两个框架： Ext JS 和 Sencha Touch
+Ext JS 6 最大的变化是合并了两个框架： Ext JS 和 Sencha Touch
 
 ### 设置 Ext JS
 
@@ -482,3 +482,434 @@ event可以是用户行为，Ajax响应等
     
 当然你也可以使用**nextNode**, **up**, **down**, **previousSibiling**
 
+#### Components, containers, 和layouts
+
+##### Components
+
+如button, label, 复杂控件，例如 Tree Panel, Grids等。派生自**Ext.Component**，提供了创建，修改大小，呈现，排列功能。
+
+所有components都有**xtype**属性。允许延迟加载.
+
+##### Containers
+
+用来存放其他components,　Ext.container.Container是所有containers基类
+
+Ext.toolbar.Toolbar, Ext.panel.Panel, 和 Ext.Editor为内建Components，可以包含其他components，
+Ext.button.Button非派生自Ext.container.Container，不能包含其他components
+
+    Ext.create('Ext.panel.Panel', {
+      renderTo     : Ext.getBody(),
+      width        : 700,
+      height       : 400,
+      items: [
+      {
+        xtype: 'panel',
+        title: 'Panel 1',
+      },
+      {
+        xtype: 'panel',
+        title: 'Panel 2',
+        height: 200,
+        items: [
+        {
+          xtype: 'button',
+          text: 'Click Me'
+        }
+        ]
+      },
+      {
+        xtype: 'panel',
+        title: 'Panel 3',
+        width: 150,
+        height: 100,
+      }
+      ]
+    });
+
+##### Layouts
+
+layout用来定义components位置和大小，所有的container都由个layout,　默认是auto.
+
+使用column时你可以指定columnWidth，所有的columnWidth之和应该等于１．也可以指定固定宽度。例如width: 150,　那么剩余宽度
+使用columnWidth时继续使用1作为分配
+    
+    Ext.create('Ext.panel.Panel', {
+      renderTo     : Ext.getBody(),
+      width        : 700,
+      height       : 400,
+      layout　   : 'column',
+      items: [
+      {
+        xtype: 'panel',
+        title: 'Panel 1',
+          columnWidth: 0.4,
+          height: 400,
+      },
+      {
+        xtype: 'panel',
+        title: 'Panel 2',
+          layout: 'center',
+        columnWidth: 0.6,
+        height: 400,
+        items: [
+        {
+          xtype: 'button',
+          text: 'Click Me'
+        }
+        ]
+      },
+      {
+        xtype: 'panel',
+        title: 'Panel 3',
+        width: 150,
+        height: 400,
+      }
+      ]
+    });
+    
+**updateLayout**
+
+Ext.contaner.Container方法。用来从新设置子components布局
+
+**suspendLayout**
+
+大部分你都不会直接调用updateLayout，这会在你改变大小或者移除子控件时自动调用，你可能想让它保持，然后自己手动调用updateLayout方法，
+通过设置suspendLayout为true来实现
+
+你也可以通过Ext.suspendLayouts()来对整个框架配置。并且使用Ext.resumeLayouts(true)来更新所有
+
+Ext JS内建如下layouts
+
+* absolute
+* accordion
+* anchor
+* card
+* center
+* column
+* fit
+* hbox
+* table
+* vbox
+
+
+**absolute**
+
+通过x,y属性定义绝对位置
+    
+    Ext.create('Ext.panel.Panel', {
+        renderTo: Ext.getBody(),
+        width: 700,
+        height: 400,
+        layout: 'absolute',
+        items: [
+      {
+        xtype: 'panel',
+        title: 'Panel 1',
+        x: 12,
+        y: 20,
+        height: 250,
+      },
+      {
+        xtype: 'panel',
+        title: 'Panel 2',
+        x: 200,
+        y: 150,
+        height: 200,
+      },
+      {
+        xtype: 'panel',
+        title: 'Panel 3',
+        x: 400,
+        y: 250,
+        width: 150,
+        height: 100,
+      }
+      ]
+    });
+    
+**accordion**
+
+展开选项卡，同时只能出一个
+
+    Ext.create('Ext.panel.Panel', {
+      renderTo     : Ext.getBody(),
+      width        : 700,
+      height       : 400,
+      layout       : 'accordion',
+      items: [
+      {
+        title: 'Item 1',
+        html: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum'
+      },
+      {
+        title: 'Item 2',
+        html: 'some content here'
+      },
+      {
+        title: 'Item 3',
+        html: 'empty'
+      }
+      ]
+    });
+
+**anchor**
+
+只对相对container相对大小
+
+
+    Ext.create('Ext.panel.Panel', {
+      renderTo     : Ext.getBody(),
+      width        : 700,
+      height       : 400,
+      layout       : 'anchor',
+      items: [
+      {
+        title: 'Item 1',
+        html: 'Item 1',
+        anchor: '50%'
+      },
+      {
+        title: 'Item 2',
+        html: 'Item 2',
+        anchor: '-20 -200'
+      },
+      {
+        title: 'Item 3',
+        html: 'Item 3',
+        anchor: '-200'
+      }
+      ]
+    });
+    
+**border**
+
+指定子components放置区域，例如center, north, south, west, 和east，你必须有一个component为center
+
+    Ext.create('Ext.panel.Panel', {
+      renderTo     : Ext.getBody(),
+      width        : 700,
+      height       : 400,
+      layout       : 'border',
+      items: [
+      {
+        title: 'Item 1',
+        html: 'Item 1',
+        region: 'center'
+      },
+      {
+        title: 'Item 2',
+        html: 'Item 2',
+        region: 'east',
+        width: 200
+      },
+      {
+        title: 'Item 3',
+        html: 'Item 3',
+        region: 'south',
+        height: 100
+      }
+      ]
+    });
+
+**card**
+
+只有一个子component显示，填充整个container,用在wizard和tabs
+
+    Ext.create('Ext.panel.Panel', {
+      renderTo     : Ext.getBody(),
+      width        : 700,
+      height       : 400,
+      layout       : 'card',
+      defaultListenerScope: true,
+      bbar: ['->',
+      {
+        itemId: 'btn-prev',
+        text: 'Previous',
+        handler: 'showPrevious',
+        disabled: true
+      },
+      {
+        itemId: 'btn-next',
+        text: 'Next',
+        handler: 'showNext'
+      }
+      ],
+      items: [
+      {
+        index: 0,
+        title: 'Item 1',
+        html: 'Item 1'
+      },
+      {
+        index: 1,
+        title: 'Item 2',
+        html: 'Item 2'
+      },
+      {
+        index:2,
+        title: 'Item 3',
+        html: 'Item 3'
+      }
+      ],
+      showNext: function () {
+        this.navigate(1);
+      },
+      
+      showPrevious: function () {
+        this.navigate(-1);
+      },
+      navigate: function (incr) {
+        var layout = this.getLayout();
+        var index = layout.activeItem.index + incr;
+        layout.setActiveItem(index);
+        
+        this.down('#btn-prev').setDisabled(index===0);
+        this.down('#btn-next').setDisabled(index===2);
+      }
+    });
+    
+**center**
+
+放在container中间
+
+**column**
+
+通过column来布局
+
+**fit**
+
+子component填充整个container
+
+    Ext.create('Ext.panel.Panel', {
+      renderTo     : Ext.getBody(),
+      width        : 700,
+      height       : 400,
+      layout       : 'fit',
+      bodyPadding: 20,
+      items: [
+      {
+        title: 'Item 1',
+        html: 'Fills the container',
+      }
+      ]
+    });
+    
+我们还用了bodyPadding来设置内边距
+
+**hbox**
+
+和column相似，但是可以固定高度,flex选项可以配置相对宽度比例
+
+    Ext.create('Ext.panel.Panel', {
+      renderTo     : Ext.getBody(),
+      width        : 700,
+      height       : 400,
+      layout       :
+      {
+        type: 'hbox',
+        pack: 'start',
+        align: 'stretch',
+      },
+      items: [
+      {
+        title: 'Item 1',
+        html: 'Item 1',
+        flex: 1
+      },
+      {
+        title: 'Item 2',
+        html: 'Item 2',
+        width: 100
+      },
+      {
+        title: 'Item 3',
+        html: 'Item 3',
+        flex: 2
+      }
+      ]
+    });
+    
+**table**
+
+呈现为表格格式，可以通过rowspan和colspan来设置多行列
+
+    Ext.create('Ext.panel.Panel', {
+      renderTo     : Ext.getBody(),
+      width        : 700,
+      height       : 400,
+      layout       :
+      {
+        type: 'table',
+        columns: 3,
+        tableAttrs: {
+          style: {
+            width: '100%'
+        }
+        }
+      },
+      items: [
+      {
+        rowspan: 3,
+        title: 'Item 1',
+        html: 'Item 1'
+      },
+      {
+        title: 'Item 2',
+        html: 'Item 2'
+      },
+      {
+        title: 'Item 3',
+        rowspan: 2,
+        html: 'Item 3'
+      },
+      {
+        title: 'Item 4',
+        html: 'Item 4'
+      },
+      {
+        title: 'Item 5',
+        html: 'Item 5'
+      },
+      {
+        title: 'Item 6',
+        html: 'Item 6'
+      },
+      {
+        title: 'Item 7',
+        html: 'Item 7'
+      }
+      ]
+    });
+    
+**vbox**
+
+垂直布局
+
+    Ext.create('Ext.panel.Panel', {
+      renderTo     : Ext.getBody(),
+      width        : 700,
+      height       : 400,
+      layout       :
+      {
+        type: 'vbox',
+        pack: 'start',
+        align: 'stretch',
+      },
+      items: [
+      {
+        title: 'Item 1',
+        html: 'Item 1',
+        flex: 1
+      },
+      {
+        title: 'Item 2',
+        html: 'Item 2',
+        height: 100
+      },
+      {
+        title: 'Item 3',
+        html: 'Item 3',
+        flex: 2
+      }
+      ]
+    });
