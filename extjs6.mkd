@@ -913,3 +913,99 @@ Ext JS内建如下layouts
       }
       ]
     });
+    
+## 基本控件
+
+### 了解基本控件
+
+#### Ext.Button
+
+    Ext.application({
+        name : 'Fiddle',
+    
+        launch : function() {
+            Ext.create('Ext.Button', {
+                text: 'My Button',
+                renderTo: Ext.getBody(),
+                handler: function() {
+                    alert('click');
+                }
+            });
+        }
+    });
+    
+也可以配置多个listeners
+
+    Ext.application({
+        name : 'Fiddle',
+    
+        launch : function() {
+            Ext.create('Ext.Button', {
+                text: 'My Button',
+                renderTo: Ext.getBody(),
+                listeners: {
+                    click: {
+                        fn: function() {
+                            alert("click");
+                        }
+                    },
+                    mouseout: {
+                        fn: function() {
+                            alert("mouse out");
+                        }
+                    }
+                }
+            });
+        }
+    });
+    
+按钮链接
+
+    Ext.create('Ext.Button', {
+                text: 'Link Button',
+                renderTo: Ext.getBody(),
+                href: 'http://www.sencha.com/'
+            });
+            
+菜单按钮
+
+    Ext.create('Ext.Button', {
+                text: 'My Button',
+                renderTo: Ext.getBody(),
+                menu: [{
+                    text: 'Item 1'   
+                }, {
+                    text: 'Item 2'
+                }, {
+                    text: 'Item 3'
+                }]
+            });
+          
+Ext.Button可设置的属性由bind, cls, disabled, html, tooltip, tpl
+
+#### Ext.MessageBox
+
+Ext.window.MessageBox提供消息框，Ext.MessageBox是该类的单例。可以显示alert, confirmation, prompt ...
+
+Ext.Msg是Ext.MessageBox的别名
+
+    Ext.Msg.alert("Info", "你好世界！");
+
+    Ext.Msg.confirm("Confirm", "确定要取消更新吗？", function(selected) {
+        if ('yes' == selected) {
+            alert("yes");
+        } else {
+            alert("no");
+        }
+    });
+
+
+也可以自定义message box
+
+    Ext.MessageBox.show({
+        title: 'Save Changes?',
+        msg: 'Do you want to save the file?',
+        buttons: Ext.MessageBox.YESNO,
+        fn: function(selected) {},
+       icon: Ext.MessageBox.QUESTION
+    });
