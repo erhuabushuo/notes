@@ -1009,3 +1009,101 @@ Ext.Msg是Ext.MessageBox的别名
         fn: function(selected) {},
        icon: Ext.MessageBox.QUESTION
     });
+    
+### Forms和forms fields
+
+#### Ext.form.Panel
+
+form panel继承自panel，并且添加了相关表单功能，例如field management, validation, submission等。默认的layout是anchor
+
+form panel有个非常方便的配置fieldDefaults, 可以用来指定fields默认配置
+
+#### Fields
+
+通用fields有：
+
+    Ext.form.field.Checkbox
+    Ext.form.field.ComboBox
+    Ext.form.field.Date
+    Ext.form.field.File
+    Ext.form.field.Hidden
+    Ext.form.field.HtmlEditor
+    Ext.form.field.Number
+    Ext.form.field.Raido
+    Ext.form.field.Text
+    Ext.form.field.TextArea
+    Ext.form.field.Time
+    
+###### Ext.form.field.Text
+
+    Ext.create('Ext.form.field.Text', {
+      renderTo: Ext.getBody(),
+      name: 'email',
+      fieldLabel: 'Email',
+      allowBlank: false,   // 验证属性, 这里如果为空将会报验证错误
+      vtype: 'email'    
+    });
+    
+###### Ext.form.field.Number
+    
+    Ext.create('Ext.form.field.Number', {
+        renderTo: Ext.getBody(),
+        name: 'Count',
+        fieldLabel: 'Count',
+        maxValue: 10,
+        minValue: 0
+    });
+
+你可以通过配置选项:hideTrigger, keyNavEnabled和mouseWheelEnabled来移除spinner buttons, arrow keys, 与滚轮事件
+
+##### Ext.form.field.ComboBox
+
+combobox由store提供下拉数据
+
+    var months = Ext.create('Ext.data.Store', {
+          fields: ['abbr', 'name'],
+          data: [
+          {"abbr":"JAN", "name":"January"},
+          {"abbr":"FEB", "name":"February"},
+          {"abbr":"MAR", "name":"March"},
+          {"abbr":"APR", "name":"April"},
+          {"abbr":"MAY", "name":"May"},
+          {"abbr":"JUN", "name":"June"},
+          {"abbr":"JUL", "name":"July"},
+          {"abbr":"AUG", "name":"August"},
+          {"abbr":"SEP", "name":"September"},
+          {"abbr":"OCT", "name":"October"},
+          {"abbr":"NOV", "name":"November"},
+          {"abbr":"DEC", "name":"December"}
+          ]
+    });
+    
+    Ext.create('Ext.form.ComboBox', {
+        fieldLabel: 'Choose Month',
+        store: months,
+        queryMode: 'local',
+        displayField: 'name',
+        valueField: 'abbr',
+        renderTo: Ext.getBody()
+    });
+     
+##### Ext.form.field.HtmlEditor
+
+    Ext.create('Ext.form.HtmlEditor', {
+        width: 800,
+        height: 200,
+        renderTo: Ext.getBody()
+    });   
+    
+#### 表单验证
+
+大部分fields都有一些验证规则，例如你输入非数字到number field，那么就会提示无效数字，text fields含有
+allowBlank, minLength和maxLength。也可以使用正则表达式设置自定义验证.
+
+##### form panel的events
+
+* beforeaction: 执行任何action前
+* actionfailed
+* actioncomplete
+* validitychange
+* dirtychange
