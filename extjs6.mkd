@@ -981,16 +981,16 @@ Ext JS内建如下layouts
                 }]
             });
           
-Ext.Button可设置的属性由bind, cls, disabled, html, tooltip, tpl
-
-#### Ext.MessageBox
-
-Ext.window.MessageBox提供消息框，Ext.MessageBox是该类的单例。可以显示alert, confirmation, prompt ...
-
-Ext.Msg是Ext.MessageBox的别名
-
+    Ext.Button可设置的属性由bind, cls, disabled, html, tooltip, tpl
+    
+    #### Ext.MessageBox
+    
+    Ext.window.MessageBox提供消息框，Ext.MessageBox是该类的单例。可以显示alert, confirmation, prompt ...
+    
+    Ext.Msg是Ext.MessageBox的别名
+    
     Ext.Msg.alert("Info", "你好世界！");
-
+    
     Ext.Msg.confirm("Confirm", "确定要取消更新吗？", function(selected) {
         if ('yes' == selected) {
             alert("yes");
@@ -998,10 +998,10 @@ Ext.Msg是Ext.MessageBox的别名
             alert("no");
         }
     });
-
-
-也可以自定义message box
-
+    
+    
+    也可以自定义message box
+    
     Ext.MessageBox.show({
         title: 'Save Changes?',
         msg: 'Do you want to save the file?',
@@ -1010,18 +1010,18 @@ Ext.Msg是Ext.MessageBox的别名
        icon: Ext.MessageBox.QUESTION
     });
     
-### Forms和forms fields
-
-#### Ext.form.Panel
-
-form panel继承自panel，并且添加了相关表单功能，例如field management, validation, submission等。默认的layout是anchor
-
-form panel有个非常方便的配置fieldDefaults, 可以用来指定fields默认配置
-
-#### Fields
-
-通用fields有：
-
+    ### Forms和forms fields
+    
+    #### Ext.form.Panel
+    
+    form panel继承自panel，并且添加了相关表单功能，例如field management, validation, submission等。默认的layout是anchor
+    
+    form panel有个非常方便的配置fieldDefaults, 可以用来指定fields默认配置
+    
+    #### Fields
+    
+    通用fields有：
+    
     Ext.form.field.Checkbox
     Ext.form.field.ComboBox
     Ext.form.field.Date
@@ -1034,8 +1034,8 @@ form panel有个非常方便的配置fieldDefaults, 可以用来指定fields默�
     Ext.form.field.TextArea
     Ext.form.field.Time
     
-###### Ext.form.field.Text
-
+    ###### Ext.form.field.Text
+    
     Ext.create('Ext.form.field.Text', {
       renderTo: Ext.getBody(),
       name: 'email',
@@ -1044,7 +1044,7 @@ form panel有个非常方便的配置fieldDefaults, 可以用来指定fields默�
       vtype: 'email'    
     });
     
-###### Ext.form.field.Number
+    ###### Ext.form.field.Number
     
     Ext.create('Ext.form.field.Number', {
         renderTo: Ext.getBody(),
@@ -1053,13 +1053,13 @@ form panel有个非常方便的配置fieldDefaults, 可以用来指定fields默�
         maxValue: 10,
         minValue: 0
     });
-
-你可以通过配置选项:hideTrigger, keyNavEnabled和mouseWheelEnabled来移除spinner buttons, arrow keys, 与滚轮事件
-
-##### Ext.form.field.ComboBox
-
-combobox由store提供下拉数据
-
+    
+    你可以通过配置选项:hideTrigger, keyNavEnabled和mouseWheelEnabled来移除spinner buttons, arrow keys, 与滚轮事件
+    
+    ##### Ext.form.field.ComboBox
+    
+    combobox由store提供下拉数据
+    
     var months = Ext.create('Ext.data.Store', {
           fields: ['abbr', 'name'],
           data: [
@@ -1087,23 +1087,600 @@ combobox由store提供下拉数据
         renderTo: Ext.getBody()
     });
      
-##### Ext.form.field.HtmlEditor
-
+    ##### Ext.form.field.HtmlEditor
+    
     Ext.create('Ext.form.HtmlEditor', {
         width: 800,
         height: 200,
         renderTo: Ext.getBody()
     });   
     
-#### 表单验证
+    #### 表单验证
+    
+    大部分fields都有一些验证规则，例如你输入非数字到number field，那么就会提示无效数字，text fields含有
+    allowBlank, minLength和maxLength。也可以使用正则表达式设置自定义验证.
+    
+    ##### form panel的events
+    
+    * beforeaction
+    * actionfailed
+    * actioncomplete
+    * validitychange: 
+    * dirtychange
+    
+    ##### form field containers
+    
+    **Ext.form.CheckboxGroup**
+    
+    CheckboxGroup继承FieldContainer，用来分组checkbox
+    
+    
+    Ext.create('Ext.form.CheckboxGroup', {
+        renderTo: Ext.getBody(),
+        fieldLabel: 'Skills ',
+        vertical: true,
+        columns: 1,
+        items: [
+             { boxLabel: 'C++', name: 'rb', inputValue: '1' },
+              { boxLabel: '.Net Framework', name: 'rb', inputValue: '2', checked: true },
+              { boxLabel: 'C#', name: 'rb', inputValue: '3' },
+              { boxLabel: 'SQL Server', name: 'rb', inputValue: '4' },
+        ]
+    });
+    
+    **Ext.form.FieldContainer**
+    
+    用来将相关field设为一组，附加到单个label
+    
+    Ext.create('Ext.form.FieldContainer', {
+        renderTo: Ext.getBody(),
+        fieldLabel: 'Name',
+        layout: 'hbox',
+        combineErrors: true,
+        defaultType: 'textfield',
+        defaults: {
+            hideLabel: true
+        },
+        items: [{
+            name: 'firstName',
+            fieldLabel: 'First Name',
+            flex: 2,
+            emptyText: 'First',
+            allowBlank: false
+          }, {
+            name: 'lastName',
+            fieldLabel: 'Last Name',
+            flex: 3,
+            margin: '0 0 0 6',
+            emptyText: 'Last',
+            allowBlank: false
+          }]
+    });
+    
+    **Ext.form.RaidioGroup**
+    
+    RadioGroup继承CheckboxGroup用分组radio buttons.
+    
+    Ext.create('Ext.form.RadioGroup', {
+        renderTo: Ext.getBody(),
+        fieldLabel: 'Sex ',
+        vertical: true,
+        columns: 1,
+        items: [
+            { boxLabel: 'Male', name: 'rb', inputValue: '1' },
+    			{ boxLabel: 'Female', name: 'rb', inputValue: '2' }
+        ]
+    });
+    
+    **提交表单**
+    
+    通过getForm来取得form,并且并且使用isValid来查看验证
+    
+    var form = this.up('form').getForm();
+    if (form.isValid()) {
+      form.submit({
+        url: 'someurl',
+        success: function () {
+          
+        },
+        failure: function () {
+          
+        }
+      });
+    } else {
+      Ext.Msg.alert('Error', 'Fix the errors in the form')
+    }
+    
+    **Menus和toolbar**
+    
+    Ext JS支持构建各种toolbar和menus。使用Ext.toolbar.Toolbar构建toolbar。默认任何Ext.toolbar.Toolbar下的成员为button.
+    你也可以使用其他组件，例如text field, number field, drop down等
+    
+    在布置成员时，你可以使用Ext.toolbar.Spacer, Ext.toolbar.Separator和Ext.toolbar.Fill,添加space, separator bar,和向右对其的container.　它们的对应的简写是　' '(空格), '|', '->'
+    
+    Ext.menu.Menu用Ext.menu.Item构建成员
+    
+    Ext.create('Ext.toolbar.Toolbar', {
+            renderTo: Ext.getBody(),
+            width: 800,
+            items: [
+                {
+                    text: 'My Button'
+                },
+                {
+                    text: 'My Button',
+                    menu: [{
+                        text: 'Item 1'
+                    }, {
+                        text: 'Item 2'
+                    }, {
+                        text: 'Item 3'
+                    }]
+                },
+                {
+                    text: 'Menu with divider',
+                    tooltip: {
+                        text: 'Tooltip info',
+                        title: 'Tip Title'
+                    },
+                    menu: {
+                        items: [{
+                            text: 'Task 1',
+                            // handle onItemClick
+                        }, '-', {
+                            text: 'Task 2',
+                        }, {
+                            text: 'Task 3',
+                        }]
+                    }
+                },
+                '->',
+                {
+                    xtype: 'textfield',
+                    name: 'field1',
+                    emptyText: 'search web site'
+                },
+                '-',
+                'Some Info',
+                {
+                    xtype: 'tbspacer'
+                },
+                {
+                    name: 'Count',
+                    xtype: 'numberfield',
+                    value: 0,
+                    minValue: 0,
+                    maxValue: 10,
+                    width: 60
+                }
+            ]
+        }); 
+        
+## Data packages
 
-大部分fields都有一些验证规则，例如你输入非数字到number field，那么就会提示无效数字，text fields含有
-allowBlank, minLength和maxLength。也可以使用正则表达式设置自定义验证.
+### Model
 
-##### form panel的events
+model定义字段，字段类型，关联关系，和代理。继承自Ext.data.Model类。
 
-* beforeaction: 执行任何action前
-* actionfailed
-* actioncomplete
-* validitychange
-* dirtychange
+类型，验证和代理都时可选的，如果没有指定类型时，将会使用默认的**auto**类型。代理通常在data store指定，但你也可以在
+model指定。
+
+#### Field
+
+Ext.date.field.Field用来定义model属性。field可以预定义类型或自定义类型，预定义类型有：
+
+* auto
+* boolean
+* date
+* int
+* number
+* string
+
+##### 数据转换
+
+默认，当定义了字段类型，那么在保存将会进行类型转换为该类型。转换通过内建的**convert**方法。auto字段类型没有
+**convert**方法，所以auto字段类型不进行转换。
+
+你可以通过配置convert为null来取消转换提高性能
+
+##### Validators
+
+model支持数据验证。支持如下验证：
+
+* presence
+* format
+* length
+* exclusion and inclusion
+
+    Ext.define('Employee', {
+      extend: 'Ext.data.Model',
+      fields: [
+      { name: 'id',  type: 'int',  convert: null },
+      { name: 'firstName', type: 'string' },
+      { name: 'lastName', type: 'string' },
+      { name: 'fulltime', type: 'boolean', defaultValue: true, convert: null },
+      { name: 'gender', type: 'string' },
+      { name: 'phoneNumber', type: 'string'},
+      ],
+      validators: {
+        firstName: [
+        { type: 'presence'},
+        { type: 'length', min: 2 }
+        ],
+        lastName:[
+        { type: 'presence'},
+        { type: 'length', min: 2 }
+        ],
+        phoneNumber: {
+          type: 'format',
+          matcher: '/^[(+{1})|(00{1})]+([0-9]){7,10}$/'
+        },
+        gender: {
+          type: 'inclusion',
+          list: ['Male', 'Female']
+        },
+      }
+    });
+    
+使用Ext.create来创建model实例
+    
+    var newEmployee = Ext.create('Employee', {
+      id : 1,
+      firstName : 'Shiva'
+      lastName : 'Kumar',
+      fulltime : true,
+      gender: 'Male',
+      phoneNumber: '123-456-7890'
+    });
+    
+也可以通过**get**和**set**来取得或者设置值
+    
+    var lastName = newEmployee.get('lastName');
+    newEmployee.set('gender','Female');
+    
+##### Relationships
+
+要定义两个实体关系，使用如下类型：
+
+**one-to-one**
+
+    Ext.define('Address', {
+      extend: 'Ext.data.Model',
+      
+      fields: [
+      'address',
+      'city',
+      'state',
+      'zipcode'
+      ]
+    });
+    
+    Ext.define('Employee', {
+      extend: 'Ext.data.Model',
+      
+      fields: [{
+        name: 'addressId',
+        reference: 'Address'
+      }]
+    });
+    
+**one-to-many**
+
+    Ext.define('Department', {
+      extend: 'Ext.data.Model'
+      fields: [
+      { name: 'employeeId', reference: 'Employee' }
+      ]
+    });
+    
+    Ext.define('Division', {
+      extend: 'Ext.data.Model',
+      
+      fields: [
+      { name: 'departmentId', reference: 'Department' }
+      ]
+    });
+    
+**many-to-many**
+
+    Ext.define('Employee', {
+      extend: 'Ext.data.Model',
+      
+      fields: [
+      { name: 'empId',  type: 'int',  convert: null },
+      { name: 'firstName', type: 'string' },
+      { name: 'lastName', type: 'string' },
+      ],
+      
+      manyToMany: 'Project'
+    });
+    
+    Ext.define('Project', {
+      extend: 'Ext.data.Model',
+      
+      fields: [
+      'name'
+      ],
+      
+      manyToMany: 'Employee'
+    });
+    
+##### 自定义字段类型
+
+通过继承Ext.data.field.Field来自定义字段类型
+
+    Ext.define('App.field.Email', {
+      extend: 'Ext.data.field.Field',
+      alias: 'data.field.email',
+      validators: {
+        type: 'format',
+        matcher: /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/,
+        message: 'Wrong Email Format'
+      }
+    });　
+    
+#### Store
+
+store呈现model集合实例和proxies。也定义集合操作，例如排序，过滤等。通过继承Ext.data.Store类来定义
+
+在定义store是也要指定proxy.用来告知该store如何读写数据。
+
+    var myStore = Ext.create('Ext.data.Store', {
+      model: 'Employee',
+      storeId: 'mystore',
+      proxy: {
+        type: 'rest',
+        url: '/employee',
+        reader: {
+          type: 'json',
+          rootProperty: 'data'
+        }
+      },
+      autoLoad: true,
+      autoSync: true
+    });
+
+storeId为唯一标识。store拥有load方法，用来通过proxy来加载数据.如果autoLoad设置为true,那么load方法将会在创建之后自动调用。
+
+同样你可以设置autoSync为true,让增删改立即同步。设置为false调用sync方法手动同步操作。
+
+调用sync方法会触发一系列操作。如果你增加或者删除了记录，sync方法会调用多个回调方法进行操作
+
+    store.sync({
+      callback: function (batch, options) {
+        //Do something
+      },
+      success: function (batch, options) {
+        //Do something
+      },
+    failure: function (batch, options) {
+        //Do something
+      },
+      scope: this
+    });
+
+success方法会在所有sync操作完成并且没有任何异常或错误。failure方法会在一个或者多个sync操作失败调用。callback方法不管成功失败都会调用.
+
+sync还由各属性params，可以用来在sync过程中传递参数
+
+##### The inline data store
+
+如果你只想绑定静态数据
+
+    Ext.create('Ext.data.Store', {
+      model: 'Employee',
+      data: [
+      {
+        firstName: 'Shiva',
+        lastName: 'Kumar',
+        gender: 'Male',
+        fulltime: true,
+        phoneNumber: '123-456-7890'
+      },
+      {
+        firstName: 'Vishwa',
+        lastName: 'Anand',
+        gender: 'Male',
+        fulltime: true,
+        phoneNumber: '123-456-7890'
+      }
+      ]
+    });
+    
+##### 过滤和排序
+
+支持本地和远程过滤，排序
+
+    var myStore = Ext.create('Ext.data.Store', {
+      model: 'Employee',
+    sorters: [{
+        property: 'firstName',
+        direction: 'ASC'
+      }, {
+        property: 'fulltime',
+        direction: 'DESC'
+      }],
+      
+      filters: [{
+        property: 'firstName',
+        value: /an/
+      }]
+    });
+    
+  
+要使用远程排序，过滤，通过设置remoteSort和remoteFilter为true, 那么就可以在服务端排序。
+
+##### 访问store
+
+**StoreManager**
+
+    Ext.create('Ext.data.Store', {
+      model: 'Employee',
+      storeId: 'mystore',
+      proxy: {
+        type: 'rest',
+        url: '/employee',
+        reader: {
+          type: 'json',
+          rootProperty: 'data'
+        }
+      }
+    });
+    
+使用StorageManager.lookup方法来访问store
+ 
+    Ext.data.StoreManager.lookup('myStore');
+ 
+Ext.getStore是上面的简写
+
+**Ext.app.ViewModel**
+
+当在ViewController最好是Ext.app.ViewModel的getStore方法
+
+    var myStore = this.getViewModel().getStore('myStore')
+
+##### Store events
+
+    add: This is called when a record is added to the store
+    beforeload: This is called before loading the data
+    beforesync: This is called before the sync operation
+    datachanged: This is called when records are added or removed from the store
+    load: This is called when the store reads from a remote data store
+    remove: This is called when a record is removed from the store
+    update: This is called when a record gets updated
+    
+    
+    Ext.create('Ext.data.Store', {
+      model: 'Employee ',
+      storeId: 'mystore',
+      proxy: {
+        type: 'rest',
+        url: '/employee',
+        reader: {
+          type: 'json',
+          rootProperty: 'data'
+        }
+      },
+      listeners: {
+        load: function (store, records, options) {
+          //Do something
+        }
+      }
+    });
+    
+##### store在ViewModel
+
+store和ViewModel可以分开定义或者同时定义。
+
+    Ext.define('MyApp.view.employee.EmployeeModel', {
+      extend: 'Ext.app.ViewModel',
+      alias: 'viewmodel.employee',
+      stores: {
+        employee: {
+          fields: [
+          { name: 'id', type: 'string' },
+          { name: 'firstname', type: 'string' },
+          { name: 'lastname', type: 'string' }
+          ],
+          autoLoad: false,
+          sorters: [{
+            property: 'firstname',
+            direction: 'ASC'
+          }],
+          proxy: {
+            type: 'rest',
+            url: 'employee',
+            reader: {
+              type: 'json',
+            },
+            writer: {
+              type: 'json'
+            }
+          }
+        }
+      }
+    });
+    
+#### Proxies
+
+stores和models使用proxy来加载和保存数据
+
+##### 客户端proxy
+
+客户端proxies用来通过客户端自身处理数据加载及保存，有三种：memory, LocalStorage, SessionStorage
+
+**memory**
+
+    var data = {
+      data: [
+      {
+        firstName: 'Shiva',
+        lastName: 'Kumar',
+        gender: 'Male',
+        fulltime: true,
+        phoneNumber: '123-456-7890'
+      },
+      {
+        firstName: 'Vishwa',
+        lastName: 'Anand',
+        gender: 'Male',
+        fulltime: true,
+        phoneNumber: '123-456-7890'
+      },]
+    };
+    
+    
+    var myStore = Ext.create('Ext.data.Store', {
+      model: 'Employee',
+      data : data,
+      proxy: {
+        type: 'memory',
+        reader: {
+          type: 'json',
+          rootProperty: 'Employee'
+        }
+      }
+     });
+     
+**LocalStorage**
+
+    var myStore = Ext.create('Ext.data.Store', {
+      model: 'Benefits',
+      autoLoad: true,
+      proxy: {
+        type: 'localstorage',
+        id: 'benefits'
+      }
+    });
+    
+**SessionStorage**
+
+    var myStore = Ext.create('Ext.data.Store', {
+      model: 'Benefits',
+      autoLoad: true,
+      proxy: {
+        type: 'sessionStorage',
+        id  : 'benefits'
+      }
+    });
+    
+    
+##### 服务端proxy
+
+服务端proxy通过服务器来读取和保存数据，有四种方式：
+
+* Ajax
+* Direct: 使用**Ext.Directr**于服务器通信
+* JSONP
+* REST
+
+**JSONP**
+
+    var myStore = Ext.create('Ext.data.Store', {
+      model: 'Products',
+      proxy: {
+      type: 'jsonp',
+        url : 'http://domain.com/products',
+        callbackKey: 'productsCallback'
+      }
+    });
