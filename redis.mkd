@@ -1,0 +1,164 @@
+## 简介
+
+Redis是一个开源的、高性能的、基于键值对的缓存与存储系统，通过提供多种键值数据类型来适应不同场景下的缓存与存储需求。同时 Redis 的诸多高层级功能使其可以胜任消息队列、任务队列等不同的角色。
+
+Redis是REmote DIctionary Server（远程字典服务器）的缩写
+
+### 历史与发展
+
+2008年，Merzia公司创始人Salvatore Sanfilippo在构建基于MySQL的网站实时统计系统LLOOGG时,
+
+由于对MySQL的性能感到失望，于是自己量身定做数据库，即Redis，并同年开源
+
+Hacker News 2012年调查12%公司使用Redis.国内如新浪微博、街旁和知乎，国外如GitHub、Stack Overflow、Flickr、暴雪和Instagram
+
+VMware公司从2010年开始赞助Redis的开发，Salvatore Sanfilippo和Pieter Noordhuis也分别于同年的3月和5月加入VMware，全职开发Redis。
+
+2015年4月2日，Redis发布了3.0.0的正式版本。
+
+### 特性
+
+#### 存储结构
+
+以字典结构存储数据，并允许其他应用通过TCP协议读写字典中的内容
+
+    ● 字符串类型
+    ● 散列类型
+    ● 列表类型
+    ● 集合类型
+    ● 有序集合类型
+    
+#### 内存存储与持久化
+
+Redis 数据库中的所有数据都存储在内存中。
+
+在一台普通的笔记本电脑上，Redis可以在一秒内读写超过10万个键值。
+
+Redis提供了对持久化的支持，即可以将内存中的数据异步写入到硬盘中，同时不影响继续提供服务。
+
+#### 功能丰富
+
+Redis 虽然是作为数据库开发的，但由于其提供了丰富的功能，越来越多的人将其用作缓存、队列系统等
+
+支持生存时间(Time To Live, TTL)
+
+在性能上 Redis是单线程模型，而Memcached支持多线程,随着Redis 3.0 的推出，标志着Memcached几乎所有功能都成为了Redis的子集。
+
+作为缓存系统，Redis 还可以限定数据占用的最大内存空间，在数据达到空间限制后可以按照一定的规则自动淘汰不需要的键。
+
+除此之外，Redis 的列表类型键可以用来实现队列，并且支持阻塞式读取，可以很容易地实现一个高性能的优先级队列。同时在更高层面上，Redis 还支持“发布/订阅”的消息模式，可以基于此构建聊天室 等系统。
+
+#### 简单稳定
+
+Redis提供了几十种不同编程语言的客户端库，这些库都很好地封装了Redis的命令，使得在程序中与 Redis 进行交互变得更容易。
+
+## 准备
+
+### 安装
+
+    wget http://download.redis.io/redis-stable.tar.gz
+    tar xzf redis-stable.tar.gz
+    cd redis-stable/
+    sudo mkdir -p /etc/redis
+    sudo cp redis.conf /etc/redis/6379.conf
+    sudo cp utils/redis_init_script /etc/init.d/redis_6379
+    sudo chmod +x /etc/init.d/redis_6379
+    sudo update-rc.d redis_6379 defaults
+    
+### 启动和停止redis
+
+#### 启动
+
+    $ redis-server
+    
+指定端口：（默认6379)
+
+    $ redis-server --port 6380
+
+#### 停止
+
+    $ redis-cli SHUTDOWN
+ 
+当Redis收到SHUTDOWN命令后，会先断开所有客户端连接，然后根据配置执行持久化，最后完成退出。
+
+
+### Redis 命令行客户端
+
+#### 发送命令
+
+    $ redis-cli -h 127.0.0.1 -p 6379
+    
+提供了PING命令测试Redis连接是否连接正常
+
+    127.0.0.1:6379> PING
+    PONG
+    127.0.0.1:6379> ECHO hi
+    "hi"
+
+#### 命令返返回值
+
+1.状态回复
+
+    redis> PING
+    PONG
+
+2.错误回复
+
+    redis> ERRORCOMMEND
+    (error) ERR unknown command 'ERRORCOMMEND'
+
+    redis> LPUSH key 1
+    (integer) 1
+    redis> GET key
+    (error) WRONGTYPE Operation against a key holding the wrong kind of value
+
+3.整数回复
+
+    redis> INCR foo
+    (integer) 1
+    
+4.字符串回复
+
+    redis> GET foo
+    "1"
+    
+当请求的键值不存在时，将会得到空值
+
+    redis> GET noexists
+    (nil)
+    
+5.多行字符串回复
+
+    redis> KEYS *
+    1) "bar"
+    2) "foo"
+    
+### 配置
+
+设置配置文件
+
+    $ redis-server /path/to/redis.conf
+
+覆盖配置文件配置
+
+    $ redis-server /path/to/redis.conf --loglevel warning
+
+运行时配置（并不是所有配置都可以在运行时配置）
+
+    redis> CONFIG SET loglevel warning
+    OK
+
+获取配置
+
+    redis> CONFIG GET loglevel
+    1) "loglevel"
+    2) "warning"
+    
+### 多数据库
+
+每个数据库对外都是以一个从0开始的递增数字命名，Redis默认支持16个数据库，可以通过配置参数databases来修改这一数字。客户端与Redis建立连接后会自动选择0号数据库，不过可以随时使用SELECT命令更换数据库，如要选择1号数据库：
+    
+    redis> SELECT 1
+    OK
+    redis [1]> GET foo
+    (nil)
