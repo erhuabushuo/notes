@@ -59,6 +59,7 @@ Redis提供了几十种不同编程语言的客户端库，这些库都很好地
     wget http://download.redis.io/redis-stable.tar.gz
     tar xzf redis-stable.tar.gz
     cd redis-stable/
+    make && sudo make install
     sudo mkdir -p /etc/redis
     sudo cp redis.conf /etc/redis/6379.conf
     sudo cp utils/redis_init_script /etc/init.d/redis_6379
@@ -162,3 +163,90 @@ Redis提供了几十种不同编程语言的客户端库，这些库都很好地
     OK
     redis [1]> GET foo
     (nil)
+    
+## 入门
+
+### 热身
+
+1.获得符合规则的键名列表
+
+    KEYS pattern
+    
+pattern支持glob风格通配符
+
+
+2. 判断一个键是否存在
+
+    EXISTS key
+    
+    
+3. 删除键
+
+    DEL key[key...]
+    
+4. 获得键值的数据类型
+
+    TYPE key
+    
+返回值可能是string, hash, list, set, zset(有序集合类型)
+
+### 字符串类型
+
+1.赋值与取值
+
+    127.0.0.1:6379> SET key hello
+    OK
+    127.0.0.1:6379> GET key
+    "hello"
+    
+2.递增数字
+
+    127.0.0.1:6379> SET num 1
+    OK
+    127.0.0.1:6379> GET num
+    "1"
+    127.0.0.1:6379> INCR num
+    (integer) 2
+    
+### 命令拾遗
+
+1. 增加指定的整数
+
+    INCRBY key increment
+    
+2. 减少指定的整数
+
+    DECRBY key increment
+    
+3. 增加指定浮点数
+
+    INCRBYFLOAT key increment
+    
+4.向尾部追加值
+
+    APPEND key value
+        
+    127.0.0.1:6379> SET key hello
+    OK
+    127.0.0.1:6379> APPEND key " world"
+    (integer) 11
+    127.0.0.1:6379> GET key
+    "hello world"
+ 
+5.获取字符串长度
+
+    STRLEN key
+    
+6.同时获得/设置多个键值
+
+    MGET key[key...]
+    MSET key value [key value...]
+
+7.位操作
+
+    GETBIT key offset
+    SETBIT key offset value
+    BITCOUNT key [start] [end]
+    BITOP operation destkey key [key...]
+    
+    
